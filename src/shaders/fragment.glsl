@@ -1,8 +1,81 @@
 uniform float uTime;
 
 varying vec2 vUv;
+float sdSphere(vec3 p,float s)
+{
+    return length(p)-s;
+}
+float smin( float a, float b, float k )
+{
+    float h = max( k-abs(a-b), 0.0 )/k;
+    return min( a, b ) - h*h*k*(1.0/4.0);
+}
+mat4 rotationMatrix(vec3 axis,float angle){
+    axis=normalize(axis);
+    float s=sin(angle);
+    float c=cos(angle);
+    float oc=1.-c;
+    
+    return mat4(oc*axis.x*axis.x+c,oc*axis.x*axis.y-axis.z*s,oc*axis.z*axis.x+axis.y*s,0.,
+        oc*axis.x*axis.y+axis.z*s,oc*axis.y*axis.y+c,oc*axis.y*axis.z-axis.x*s,0.,
+        oc*axis.z*axis.x-axis.y*s,oc*axis.y*axis.z+axis.x*s,oc*axis.z*axis.z+c,0.,
+    0.,0.,0.,1.);
+}
+
+vec3 rotate(vec3 v,vec3 axis,float angle){
+    mat4 m=rotationMatrix(axis,angle);
+    return(m*vec4(v,1.)).xyz;
+}
+
+float sdBox(vec3 p,vec3 b)
+{
+    vec3 q=abs(p)-b;
+    return length(max(q,0.))+min(max(q.x,max(q.y,q.z)),0.);
+}
+
+float sdf(vec3 p){
+    vec3 p1 = rotate(p, vec3(1.), uTime/5.);
+    float box=sdBox(p1,vec3(.2));
+    float sphere=sdSphere(p,.4);
+    
+    return smin(box, sphere, 0.5);
+}
+
+vec3 calcNormal(in vec3 p)// for function f(p)
+{
+    const float eps=.0001;// or some other value
+    const vec2 h=vec2(eps,0);
+    return normalize(vec3(sdf(p+h.xyy)-sdf(p-h.xyy),
+    sdf(p+h.yxy)-sdf(p-h.yxy),
+    sdf(p+h.yyx)-sdf(p-h.yyx)));
+}
 
 void main()
 {
-    gl_FragColor = vec4(vUv, 1.0, 1.0);
+    vec2 resolution=vec2(2.,1.);
+    vec3 camPos=vec3(0.,0.,2.);
+    vec3 ray=normalize(vec3((vUv-vec2(.5))*resolution.xy,-1.));
+    
+    vec3 rayPos=camPos;
+    float t=0.;
+    float tMax=5.;
+    
+    for(int i=0;i<256;i++){
+        vec3 pos=camPos+t*ray;
+        float h=sdf(pos);
+        if(h<.0001||t>tMax)break;
+        t+=h;
+    }
+    
+    vec3 color=vec3(0.,0.,0.);
+    if(t<tMax){
+        vec3 pos=camPos+t*ray;
+        
+        color=vec3(1.,1.,1.);
+        vec3 normal=calcNormal(pos);
+        color=normal;
+        float diff=dot(vec3(1.),normal);
+        color=vec3(diff);
+    }
+    gl_FragColor=vec4(color,1.);
 }
