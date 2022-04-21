@@ -1,15 +1,25 @@
 uniform float uTime;
-
+uniform sampler2D uMatcap;
+uniform vec2 mouse;
 varying vec2 vUv;
+
+vec2 getMatcap(vec3 eye,vec3 normal){
+    vec3 reflected=reflect(eye,normal);
+    float m=2.8284271247461903*sqrt(reflected.z+1.);
+    return reflected.xy/m+.5;
+}
+
 float sdSphere(vec3 p,float s)
 {
     return length(p)-s;
 }
-float smin( float a, float b, float k )
+
+float smin(float a,float b,float k)
 {
-    float h = max( k-abs(a-b), 0.0 )/k;
-    return min( a, b ) - h*h*k*(1.0/4.0);
+    float h=max(k-abs(a-b),0.)/k;
+    return min(a,b)-h*h*k*(1./4.);
 }
+
 mat4 rotationMatrix(vec3 axis,float angle){
     axis=normalize(axis);
     float s=sin(angle);
@@ -34,11 +44,13 @@ float sdBox(vec3 p,vec3 b)
 }
 
 float sdf(vec3 p){
-    vec3 p1 = rotate(p, vec3(1.), uTime/5.);
+    vec2 resolution=vec2(2.,1.);
+
+    vec3 p1=rotate(p,vec3(1.),uTime/5.);
     float box=sdBox(p1,vec3(.2));
-    float sphere=sdSphere(p,.4);
+    float sphere=sdSphere(p -vec3(mouse*resolution.xy*2., 0.),.2);
     
-    return smin(box, sphere, 0.5);
+    return smin(box,sphere,.5);
 }
 
 vec3 calcNormal(in vec3 p)// for function f(p)
@@ -75,7 +87,9 @@ void main()
         vec3 normal=calcNormal(pos);
         color=normal;
         float diff=dot(vec3(1.),normal);
+        vec2 matcapUv = getMatcap(ray, normal);
         color=vec3(diff);
+        color = texture2D(uMatcap, matcapUv).rgb;
     }
     gl_FragColor=vec4(color,1.);
 }

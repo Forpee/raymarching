@@ -22,15 +22,27 @@ const scene = new THREE.Scene()
  */
 // Geometry
 const geometry = new THREE.PlaneBufferGeometry(1, 1, 32, 32)
+let mouse = new THREE.Vector2(0, 0)
 
 // Material
 const material = new THREE.ShaderMaterial({
     uniforms: {
-        uTime: {value: 0},
+        uTime: { value: 0 },
+        mouse: { value: new THREE.Vector2(0, 0) },
+        uMatcap: { value: new THREE.TextureLoader().load('/matcap.png') }
     },
     vertexShader: vertexShader,
     fragmentShader: fragmentShader,
     side: THREE.DoubleSide
+})
+
+document.addEventListener('mousemove', (event) => {
+    // mouse.x = e.clientX / window.innerWidth - 0.5
+    // mouse.y = -e.clientY / window.innerHeight + 0.5
+
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+    // console.log(mouse.x, mouse.y)
 })
 
 // Mesh
@@ -45,8 +57,7 @@ const sizes = {
     height: window.innerHeight
 }
 
-window.addEventListener('resize', () =>
-{
+window.addEventListener('resize', () => {
     // Update sizes
     sizes.width = window.innerWidth
     sizes.height = window.innerHeight
@@ -64,7 +75,7 @@ window.addEventListener('resize', () =>
  * Camera
  */
 // Orthographic camera
-const camera = new THREE.OrthographicCamera(-1/2, 1/2, 1/2, -1/2, 0.1, 100)
+const camera = new THREE.OrthographicCamera(-1 / 2, 1 / 2, 1 / 2, -1 / 2, 0.1, 100)
 
 // Base camera
 // const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
@@ -89,8 +100,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
  */
 const clock = new THREE.Clock()
 
-const tick = () =>
-{
+const tick = () => {
     // Update controls
     controls.update()
 
@@ -99,7 +109,10 @@ const tick = () =>
 
     // Update uniforms
     material.uniforms.uTime.value = elapsedTime
+    if (mouse) {
+        material.uniforms.mouse.value = mouse;
 
+    }
     // Render
     renderer.render(scene, camera)
 
