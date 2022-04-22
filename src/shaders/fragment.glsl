@@ -1,6 +1,7 @@
 uniform float uTime;
 uniform sampler2D uMatcap;
 uniform vec2 mouse;
+uniform float progress;
 varying vec2 vUv;
 
 vec2 getMatcap(vec3 eye,vec3 normal){
@@ -47,10 +48,12 @@ float sdf(vec3 p){
     vec2 resolution=vec2(2.,1.);
 
     vec3 p1=rotate(p,vec3(1.),uTime/5.);
-    float box=sdBox(p1,vec3(.2));
-    float sphere=sdSphere(p -vec3(mouse*resolution.xy*2., 0.),.2);
+    float box=smin(sdBox(p1,vec3(.2)), sdSphere(p, 0.3), 0.3);
+    float realSphere = sdSphere(p1, 0.3);
+    float final = mix(box, realSphere, progress);
+    float sphere=sdSphere(p -vec3(mouse*resolution.xy, 0.),.2);
     
-    return smin(box,sphere,.5);
+    return smin(final,sphere,.5);
 }
 
 vec3 calcNormal(in vec3 p)// for function f(p)

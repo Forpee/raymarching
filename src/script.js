@@ -9,7 +9,14 @@ import gsap from 'gsap'
  * Base
  */
 // Debug
+let settings = {
+    progress: 0.0
+}
+
 const gui = new dat.GUI()
+gui.add(settings, 'progress').min(0.0).max(1.0).step(0.01).onChange(() => {
+    material.uniforms.progress.value = settings.progress
+})
 
 // Canvas
 const canvas = document.querySelector('canvas.webgl')
@@ -28,6 +35,7 @@ let mouse = new THREE.Vector2(0, 0)
 const material = new THREE.ShaderMaterial({
     uniforms: {
         uTime: { value: 0 },
+        progress : { value: 0 },
         mouse: { value: new THREE.Vector2(0, 0) },
         uMatcap: { value: new THREE.TextureLoader().load('/matcap.png') }
     },
