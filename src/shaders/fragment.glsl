@@ -96,7 +96,7 @@ void main()
         color=vec3(diff);
         color = texture2D(uMatcap, matcapUv).rgb;
         float fresnel = pow(1. + dot(ray, normal), 3.);
-        color = vec3(fresnel);
+        // color = vec3(fresnel);
     }
     gl_FragColor=vec4(color,1.);
     // gl_FragColor=vec4(vec3(dist), 1.);
