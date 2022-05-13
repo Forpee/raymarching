@@ -46,12 +46,12 @@ float sdBox(vec3 p,vec3 b)
 
 float sdf(vec3 p){
     vec2 resolution=vec2(2.,1.);
-
+    
     vec3 p1=rotate(p,vec3(1.),uTime/5.);
-    float box=smin(sdBox(p1,vec3(.2)), sdSphere(p, 0.3), 0.3);
-    float realSphere = sdSphere(p1, 0.3);
-    float final = mix(box, realSphere, progress);
-    float sphere=sdSphere(p -vec3(mouse*resolution.xy, 0.),.2);
+    float box=smin(sdBox(p1,vec3(.2)),sdSphere(p,.3),.3);
+    float realSphere=sdSphere(p1,.3);
+    float final=mix(box,realSphere,progress);
+    float sphere=sdSphere(p-vec3(mouse*resolution.xy,0.),.2);
     
     return smin(final,sphere,.5);
 }
@@ -66,9 +66,9 @@ vec3 calcNormal(in vec3 p)// for function f(p)
 }
 
 void main()
-{
-    float dist = length(vUv-vec2(0.5));
-    vec3 bg = mix(vec3(0.), vec3(0.3), dist);
+// {What is ray marching?
+    float dist=length(vUv-vec2(.5));
+    vec3 bg=mix(vec3(0.),vec3(.3),dist);
     vec2 resolution=vec2(2.,1.);
     vec3 camPos=vec3(0.,0.,2.);
     vec3 ray=normalize(vec3((vUv-vec2(.5))*resolution.xy,-1.));
@@ -92,10 +92,10 @@ void main()
         vec3 normal=calcNormal(pos);
         color=normal;
         float diff=dot(vec3(1.),normal);
-        vec2 matcapUv = getMatcap(ray, normal);
+        vec2 matcapUv=getMatcap(ray,normal);
         color=vec3(diff);
-        color = texture2D(uMatcap, matcapUv).rgb;
-        float fresnel = pow(1. + dot(ray, normal), 3.);
+        color=texture2D(uMatcap,matcapUv).rgb;
+        float fresnel=pow(1.+dot(ray,normal),3.);
         // color = vec3(fresnel);
     }
     gl_FragColor=vec4(color,1.);
