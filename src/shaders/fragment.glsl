@@ -66,7 +66,7 @@ vec3 calcNormal(in vec3 p)// for function f(p)
 }
 
 void main()
-// {What is ray marching???
+// {What is ray marching???????
     float dist=length(vUv-vec2(.5));
     vec3 bg=mix(vec3(0.),vec3(.3),dist);
     vec2 resolution=vec2(2.,1.);
