@@ -72,7 +72,7 @@ void main()
     vec2 resolution=vec2(2.,1.);
     vec3 camPos=vec3(0.,0.,2.);
     vec3 ray=normalize(vec3((vUv-vec2(.5))*resolution.xy,-1.));
-    //
+    ////
     vec3 rayPos=camPos;
     float t=0.;
     float tMax=5.;
